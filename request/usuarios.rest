@@ -1,0 +1,91 @@
+@host = localhost
+@port = 5050
+
+###? Alta de usuarios
+### Register
+POST http://{{host}}:{{port}}/api/usuarios/register/
+Content-Type: application/json
+
+{
+  "nombre": "Enzo Puma",
+  "mail": "epuma@netrona.xyz",
+  "password": "1234"
+}
+
+###? =====================================================================
+###? LOGIN desde un navegador  (usa tokens en Cookies httpOnly + sameSite)
+### Nota: rest client si guarda el cookie, en general en c:\users\yo\.rest-client\cookie.json
+### Login OK
+# @no-cookie-jar
+POST http://{{host}}:{{port}}/api/usuarios/login/
+Content-Type: application/json
+
+{
+  "mail": "p.berdasco@gmail.com",
+  "password": "1234"
+}
+
+###! Login Fail - Credentials 1
+POST http://{{host}}:{{port}}/api/usuarios/login/
+Content-Type: application/json
+
+{
+  "mail": "p.berdasco@gmail.com",
+  "password": "2222"
+}
+
+###! Login Fail - Credentials 2
+POST http://{{host}}:{{port}}/api/usuarios/login/
+Content-Type: application/json
+
+{
+  "mail": "pberdasco@gmail.com",
+  "password": "1234"
+}
+
+###! Login Fail - Bad Request
+POST http://{{host}}:{{port}}/api/usuarios/login/
+Content-Type: application/json
+
+{
+  "mail": "p.berdasco@gmail.com"
+}
+
+### Get Roles & Derechos con cookies (desde navegador o cliente con cookie jar)
+GET http://{{host}}:{{port}}/api/usuarios/me
+
+### Logout con cookies (desde navegador o cliente con cookie jar)
+POST http://{{host}}:{{port}}/api/usuarios/logout
+
+
+###? ==================================================================
+###? LOGIN desde aplicaciones usa JWT para incluir en Bearer
+
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwibm9tYnJlIjoiUGFibG8gQmVyZGFzY28iLCJtYWlsIjoicC5iZXJkYXNjb0BnbWFpbC5jb20iLCJpYXQiOjE3NTQzMTU5NTksImV4cCI6MTc1NDMyMzE1OX0.6YlzEEtTTvY6eSrLeudQxthkb_Jh1dEW58iZ9d-Md_M
+@refreshToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwibm9tYnJlIjoiUGFibG8gQmVyZGFzY28iLCJtYWlsIjoicC5iZXJkYXNjb0BnbWFpbC5jb20iLCJpYXQiOjE3NTQzMTU4OTUsImV4cCI6MTc1NDkyMDY5NX0.czH-HjvVtTuHmwm7ANQUsaXa45r_Vi0s5w5ptaqLt1c
+
+### Login Ok
+POST http://{{host}}:{{port}}/api/usuarios/api-token/
+Content-Type: application/json
+
+{
+  "mail": "p.berdasco@gmail.com",
+  "password": "1234"
+}
+
+###! Get Roles & Derechos - con falla por falta de bearer
+GET http://{{host}}:{{port}}/api/usuarios/me
+
+
+### Get Roles & Derechos - Ok 
+GET http://{{host}}:{{port}}/api/usuarios/me
+Authorization: Bearer {{token}}
+
+
+### Refresh con Bearer 
+POST http://{{host}}:{{port}}/api/usuarios/refresh
+Authorization: Bearer {{refreshToken}}
+
+### LogOut
+POST http://{{host}}:{{port}}/api/usuarios/logout
+Authorization: Bearer {{token}}
