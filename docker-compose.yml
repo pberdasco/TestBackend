@@ -1,3 +1,8 @@
+# docker compose --profile prod up -d --build
+# docker compose --profile dev up -d --build
+# verificacion - logs:
+# docker compose --profile prod logs -f api
+
 services:
   api:
     profiles: ["prod"]
@@ -5,9 +10,13 @@ services:
       context: .
       dockerfile: Dockerfile
       target: runtime-prod
-    env_file: [.env.prod]
-    expose: ["3000"]
-    networks: [app-net]
+    env_file:
+      - .env.prod
+    # Exponemos sólo dentro de la red docker (Nginx lo ve). No usamos ports:
+    expose:
+      - "5111"
+    networks:
+      - appnet
     restart: unless-stopped
 
   api-dev:
@@ -16,7 +25,14 @@ services:
       context: .
       dockerfile: Dockerfile
       target: runtime-test
-    env_file: [.env.dev]
-    expose: ["3000"] # también detrás de nginx
-    networks: [app-net]
+    env_file:
+      - .env.dev
+    expose:
+      - "5111"
+    networks:
+      - appnet
     restart: unless-stopped
+
+networks:
+  appnet:
+    external: true

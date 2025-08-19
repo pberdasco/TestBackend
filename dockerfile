@@ -2,68 +2,61 @@
 # Base común
 # =========================
 FROM node:22-alpine AS base
+# instalar curl en el alpine
+RUN apk add --no-cache curl 
 WORKDIR /app
-ENV NODE_ENV=production
-# opcional pero útil si usás yarn/pnpm
 RUN corepack enable
 
 # =========================
-# Instalar dependencias de PRODUCCIÓN
+# Dependencias PRODUCCIÓN
 # =========================
 FROM base AS deps-prod
 COPY package*.json ./
+# Solo deps de producción
 RUN npm ci --omit=dev
 
 # =========================
-# Instalar dependencias de TEST (incluye devDeps)
+# Dependencias TEST/DEV
 # =========================
 FROM base AS deps-test
-ENV NODE_ENV=development
 COPY package*.json ./
+# Incluye devDependencies (p.ej. vitest, nodemon, etc.)
 RUN npm ci
 
 # =========================
 # Runtime PRODUCCIÓN
 # =========================
-FROM node:22-alpine AS runtime-prod
-WORKDIR /app
+FROM base AS runtime-prod
 ENV NODE_ENV=production
-# usuario no root por seguridad
-USER node
-
-# 1) node_modules de prod
+# Copiamos node_modules de prod
 COPY --chown=node:node --from=deps-prod /app/node_modules ./node_modules
-# 2) código fuente
+# Copiamos el código
 COPY --chown=node:node . .
+# Opcional: excluir carpetas de runtime en prod
+# (pediste "quizás sin request, scaffolder y sql")
+RUN rm -rf request scaffolder sql
 
-# healthcheck simple (requiere curl)
-USER root
-RUN apk add --no-cache curl
-USER node
-HEALTHCHECK --interval=30s --timeout=3s \
-  CMD curl -fsS http://127.0.0.1:${PORT:-3000}/health || exit 1
+# (opcional: si no servís /public desde el backend)
+# RUN rm -rf public
 
-# Ajustá el entrypoint a tu archivo real (server.js, app.js, etc.)
-CMD ["npm", "start"]
+
+# El backend debe escuchar en $PORT (ver .env)
+HEALTHCHECK --interval=30s --timeout=3s --start-period=20s \
+  CMD curl -fsS http://127.0.0.1:${PORT:-5111}/health || exit 1
+
+# Ejecutar modo prod (node src/server.js)
+CMD ["npm", "run", "start"]
 
 # =========================
-# Runtime TEST / STAGING
+# Runtime TEST/DEV
 # =========================
-FROM node:22-alpine AS runtime-test
-WORKDIR /app
+FROM base AS runtime-test
 ENV NODE_ENV=development
-USER node
-
-# 1) node_modules con devDeps
 COPY --chown=node:node --from=deps-test /app/node_modules ./node_modules
-# 2) código fuente
 COPY --chown=node:node . .
 
-USER root
-RUN apk add --no-cache curl
-USER node
-HEALTHCHECK --interval=30s --timeout=3s \
-  CMD curl -fsS http://127.0.0.1:${PORT:-3000}/health || exit 1
+HEALTHCHECK --interval=30s --timeout=3s --start-period=20s \
+  CMD curl -fsS http://127.0.0.1:${PORT:-5111}/health || exit 1
 
-# En test node --watch
+# Ejecutar modo dev
 CMD ["npm", "run", "dev"]
