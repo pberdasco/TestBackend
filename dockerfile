@@ -45,7 +45,7 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=20s \
   CMD curl -fsS http://127.0.0.1:${PORT:-5111}/health || exit 1
 
 # Ejecutar modo prod (node src/server.js)
-CMD ["npm", "run", "start"]
+CMD ["npm", "run", "start:docker"]
 
 # =========================
 # Runtime TEST/DEV
@@ -59,4 +59,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=20s \
   CMD curl -fsS http://127.0.0.1:${PORT:-5111}/health || exit 1
 
 # Ejecutar modo dev
-CMD ["npm", "run", "dev"]
+CMD ["npm", "run", "dev:docker"]
