@@ -7,12 +7,19 @@
   "type": "module",
   "main": "server.js",
   "scripts": {
-    "start": "node src/server.js", 
-    "dev": "node --watch src/server.js",
-    "test:auth-i": "vitest",
-    "test": "cross-env USE_AUTHENTICATION=false USE_AUTHORIZATION=false vitest run",
-    "test-i": "cross-env USE_AUTHENTICATION=false USE_AUTHORIZATION=false vitest"
+    "start:docker": "node src/server.js",
+    "dev:docker": "node --watch src/server.js",
+
+    "start": "node --env-file=.env src/server.js",
+    "dev": "node --env-file=.env --watch src/server.js",
+
+    "test": "cross-env NODE_ENV=test USE_AUTHENTICATION=false USE_AUTHORIZATION=false node --env-file=.env.test ./node_modules/vitest/vitest.mjs run",
+    "test:i": "cross-env NODE_ENV=test USE_AUTHENTICATION=false USE_AUTHORIZATION=false node --env-file=.env.test ./node_modules/vitest/vitest.mjs",
+
+    "test:docker": "cross-env NODE_ENV=test USE_AUTHENTICATION=false USE_AUTHORIZATION=false vitest run",
+    "test:docker-i": "cross-env NODE_ENV=test USE_AUTHENTICATION=false USE_AUTHORIZATION=false vitest"
   },
+
   "esLintConfig": {
     "extends": "semistandard"
   },

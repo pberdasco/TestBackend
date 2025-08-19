@@ -2,7 +2,6 @@ import winston from 'winston';
 // TODO: Eventualmente agregar: import DailyRotateFile from 'winston-daily-rotate-file';
 
 // Obtener las variables de entorno
-process.loadEnvFile();
 const errorsToConsole = process.env.ERRORS_TO_CONSOLE === 'true';
 const infoToConsole = process.env.INFO_TO_CONSOLE === 'true';
 const debugToConsole = process.env.DEBUG_TO_CONSOLE === 'true';

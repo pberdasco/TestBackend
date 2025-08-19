@@ -2,8 +2,6 @@ import request from 'supertest';
 import app from '../src/app.js';
 import { describe, it, expect, beforeAll } from 'vitest';
 
-process.loadEnvFile();
-
 const USE_AUTHENTICATION = process.env.USE_AUTHENTICATION === 'true';
 const USE_AUTHORIZATION = process.env.USE_AUTHORIZATION === 'true';
 
