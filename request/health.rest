@@ -1,0 +1,8 @@
+@host = localhost
+@port = 5050
+
+### HEALTH Interno
+GET http://{{host}}:{{port}}/health/
+
+### HEALTH Externo
+GET http://{{host}}:{{port}}/api/health/

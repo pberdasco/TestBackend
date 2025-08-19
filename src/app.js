@@ -30,6 +30,11 @@ app.use(cors({
     credentials: true
 }));
 
+// Health check (antes de routers)
+const healthHandler = (req, res) => res.status(200).json({ status: 'ok' });
+app.get('/health', healthHandler); // interno para Docker
+app.get('/api/health', healthHandler); // externo vía Nginx
+
 // Rutas
 routers.forEach(({ path, router }) => {
     app.use(path, router);
